@@ -2,7 +2,9 @@
 
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/zustand/stores/auth-store';
+import { UserCheckpoint } from '@/enums/auth-enums';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -19,6 +21,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isLoading = useAuthStore((state) => state.isLoading);
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     // Don't redirect while loading (e.g., during initial auth check)
@@ -27,10 +30,17 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
 
     const isAuthRoute = pathname?.startsWith('/auth');
+    const isOnboardingRoute = pathname?.startsWith('/onboarding');
 
     // If user is authenticated and trying to access auth routes, redirect to home
     if (isAuthenticated && isAuthRoute) {
       router.replace('/');
+      return;
+    }
+
+    // If user is authenticated and on onboarding, redirect to onboarding
+    if (isAuthenticated && user?.checkpoint === UserCheckpoint.ONBOARDING && !isOnboardingRoute) {
+      router.replace('/onboarding');
       return;
     }
 
@@ -39,14 +49,20 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       router.replace('/auth/login');
       return;
     }
-  }, [isAuthenticated, isLoading, pathname, router]);
+  }, [isAuthenticated, isLoading, pathname, router, user]);
 
   // Show loading state while checking authentication
   // This prevents flash of content before redirect
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-muted-foreground">Loading...</div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-sm font-medium text-foreground">Loading RentFit</p>
+            <p className="text-xs text-muted-foreground">Please wait...</p>
+          </div>
+        </div>
       </div>
     );
   }

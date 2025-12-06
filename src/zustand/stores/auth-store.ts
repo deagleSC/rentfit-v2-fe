@@ -2,11 +2,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { AuthState, AuthActions } from '@/types/auth';
 import {
+  registerAction,
   loginAction,
   googleLoginAction,
   logoutAction,
   clearErrorAction,
   setLoadingAction,
+  getCurrentUserProfileAction,
 } from '@/zustand/actions/auth-actions';
 import { getAuthToken } from '@/lib/api-client';
 
@@ -31,9 +33,20 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         ...initialState,
 
         // Auth actions
-        login: async (email: string, password: string) => {
+        register: async (name: string, email: string, password: string) => {
+          try {
+            await registerAction(name, email, password, set);
+          } catch (error) {
+            // Error is already handled by handleError in services
+            // Update loading state and re-throw so caller knows registration failed
+            set({ isLoading: false, isAuthenticated: false });
+            throw error;
+          }
+        },
+        login: async (email: string, password: string, onSuccess?: () => void) => {
           try {
             await loginAction(email, password, set);
+            onSuccess?.();
           } catch (error) {
             // Error is already handled by handleError in services
             // Update loading state and re-throw so caller knows login failed
@@ -41,9 +54,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             throw error;
           }
         },
-        loginWithGoogle: async () => {
+        loginWithGoogle: async (onSuccess?: () => void) => {
           try {
             await googleLoginAction(set);
+            onSuccess?.();
           } catch (error) {
             // Error is already handled by handleError in services
             // Update loading state and re-throw so caller knows login failed
@@ -52,6 +66,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           }
         },
         logout: () => logoutAction(set),
+        getCurrentUserProfile: async () => getCurrentUserProfileAction(set),
         clearError: () => clearErrorAction(set),
         setLoading: (loading: boolean) => setLoadingAction(loading, set),
       };

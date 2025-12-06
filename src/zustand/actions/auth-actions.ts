@@ -5,6 +5,33 @@ import type { AuthState } from '@/types/auth';
 type SetState = (partial: Partial<AuthState> | ((state: AuthState) => Partial<AuthState>)) => void;
 
 /**
+ * Register action
+ * Handles registration logic and state updates
+ */
+export async function registerAction(
+  name: string,
+  email: string,
+  password: string,
+  set: SetState
+): Promise<void> {
+  set({ isLoading: true, error: null });
+
+  const response = await authServices.registerWithEmail(name, email, password);
+
+  // Store token in localStorage
+  setAuthToken(response.token);
+
+  // Update state
+  set({
+    user: response.user,
+    token: response.token,
+    isAuthenticated: true,
+    isLoading: false,
+    error: null,
+  });
+}
+
+/**
  * Login action
  * Handles login logic and state updates
  */
@@ -73,6 +100,23 @@ export async function googleLoginAction(set: SetState): Promise<void> {
   set({
     user: response.user,
     token: response.token,
+    isAuthenticated: true,
+    isLoading: false,
+    error: null,
+  });
+}
+
+/**
+ * Get current user profile action
+ * Fetches the current user profile from the backend
+ */
+export async function getCurrentUserProfileAction(set: SetState): Promise<void> {
+  set({ isLoading: true, error: null });
+
+  const response = await authServices.getCurrentUserProfile();
+
+  set({
+    user: response.user,
     isAuthenticated: true,
     isLoading: false,
     error: null,

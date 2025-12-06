@@ -9,12 +9,14 @@ import { toast } from 'sonner';
 export default function LoginPage() {
   const login = useAuthStore((state) => state.login);
   const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
+  const getCurrentUserProfile = useAuthStore((state) => state.getCurrentUserProfile);
 
   const handleFormSubmit = async (data: LoginFormValues) => {
     try {
-      await login(data.email, data.password);
-      // Only show success if login didn't throw an error
-      toast.success('Login successful');
+      await login(data.email, data.password, () => {
+        getCurrentUserProfile();
+        toast.success('Login successful');
+      });
     } catch {
       // Error is already handled by handleError in services
       // Just prevent uncaught promise rejection
@@ -24,9 +26,10 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     try {
-      await loginWithGoogle();
-      // Only show success if login didn't throw an error
-      toast.success('Login successful');
+      await loginWithGoogle(() => {
+        getCurrentUserProfile();
+        toast.success('Google login successful');
+      });
     } catch {
       // Error is already handled by handleError in services
       // Just prevent uncaught promise rejection

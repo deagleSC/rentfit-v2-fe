@@ -9,8 +9,25 @@ export const loginSchema = z.object({
     .min(6, 'Password must be at least 6 characters'),
 });
 
-// Infer the TypeScript type from the Zod schema
+// Register form validation schema
+export const registerSchema = z
+  .object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
+    password: z
+      .string()
+      .min(1, 'Password is required')
+      .min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
+
+// Infer the TypeScript types from the Zod schemas
 export type LoginFormValues = z.infer<typeof loginSchema>;
+export type RegisterFormValues = z.infer<typeof registerSchema>;
 
 // User type matching backend response
 export interface User {
@@ -18,6 +35,7 @@ export interface User {
   name: string;
   email: string;
   roles: ('landlord' | 'tenant' | 'admin')[];
+  checkpoint: 'onboarding' | 'complete';
   image?: string;
   landlord_profile?: {
     verification_status: 'pending' | 'verified' | 'rejected';
@@ -59,9 +77,11 @@ export interface AuthState {
 
 // Auth actions type
 export interface AuthActions {
-  login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, onSuccess?: () => void) => Promise<void>;
+  loginWithGoogle: (onSuccess?: () => void) => Promise<void>;
   logout: () => void;
+  getCurrentUserProfile: () => Promise<void>;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
 }
@@ -70,4 +90,9 @@ export interface AuthActions {
 export interface LoginResponse {
   user: User;
   token: string;
+}
+
+// Current user profile response type
+export interface CurrentUserProfileResponse {
+  user: User;
 }

@@ -1,7 +1,7 @@
-import { apiCall } from '@/lib/api-client';
+import { apiCall, getAuthToken } from '@/lib/api-client';
 import { api } from '@/configs/api';
 import { handleError } from '@/lib/handle-error';
-import type { LoginResponse, LoginFormValues } from '@/types/auth';
+import type { LoginResponse, LoginFormValues, CurrentUserProfileResponse } from '@/types/auth';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 
@@ -9,6 +9,33 @@ import { auth, googleProvider } from '@/lib/firebase';
  * Authentication service functions
  * Handles all API calls related to authentication
  */
+
+/**
+ * Register with email and password
+ */
+export async function registerWithEmail(
+  name: string,
+  email: string,
+  password: string
+): Promise<LoginResponse> {
+  try {
+    const response = await apiCall<LoginResponse>({
+      method: 'POST',
+      url: api.auth.register(),
+      data: {
+        name,
+        email,
+        password,
+        roles: [], // Empty roles array as per requirement
+      },
+    });
+
+    return response.data;
+  } catch (error: unknown) {
+    handleError(error, 'Registration failed. Please try again.');
+    throw error;
+  }
+}
 
 /**
  * Login with email and password
@@ -61,6 +88,26 @@ export async function loginWithGoogle(): Promise<LoginResponse> {
     } else {
       handleError(error, 'Google login failed. Please try again.');
     }
+    throw error;
+  }
+}
+
+/**
+ * Get current user profile
+ * Fetches the current user profile from the backend
+ */
+export async function getCurrentUserProfile(): Promise<CurrentUserProfileResponse> {
+  try {
+    const response = await apiCall<CurrentUserProfileResponse>({
+      method: 'GET',
+      url: api.auth.me(),
+      headers: {
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    });
+    return response.data;
+  } catch (error: unknown) {
+    handleError(error, 'Failed to get current user profile.');
     throw error;
   }
 }
