@@ -1,6 +1,6 @@
 import { setAuthToken } from '@/lib/api-client';
 import * as authServices from '@/zustand/services/auth-services';
-import type { AuthState } from '@/types/auth';
+import type { AuthState, UpdateProfilePayload } from '@/types/auth';
 
 type SetState = (partial: Partial<AuthState> | ((state: AuthState) => Partial<AuthState>)) => void;
 
@@ -118,6 +118,26 @@ export async function getCurrentUserProfileAction(set: SetState): Promise<void> 
   set({
     user: response.user,
     isAuthenticated: true,
+    isLoading: false,
+    error: null,
+  });
+}
+
+/**
+ * Update profile action
+ * Updates the current user's profile and refreshes the user state
+ */
+export async function updateProfileAction(
+  data: UpdateProfilePayload,
+  set: SetState
+): Promise<void> {
+  set({ isLoading: true, error: null });
+
+  const response = await authServices.updateUserProfile(data);
+
+  // Update state with the updated user data
+  set({
+    user: response.user,
     isLoading: false,
     error: null,
   });

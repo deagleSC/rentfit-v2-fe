@@ -107,6 +107,15 @@ export const ticketsApi = {
 } as const;
 
 /**
+ * Cloudinary API Routes
+ */
+export const cloudinaryApi = {
+  upload: () => `${API_BASE_URL}/api/cloudinary/upload`,
+  uploadMultiple: () => `${API_BASE_URL}/api/cloudinary/upload-multiple`,
+  delete: (publicId: string) => `${API_BASE_URL}/api/cloudinary/delete/${publicId}`,
+} as const;
+
+/**
  * System/Health API Routes
  */
 export const systemApi = {
@@ -124,6 +133,7 @@ export const api = {
   inspections: inspectionsApi,
   notifications: notificationsApi,
   tickets: ticketsApi,
+  cloudinary: cloudinaryApi,
   system: systemApi,
 } as const;
 

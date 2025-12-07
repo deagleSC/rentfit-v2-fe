@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
+import { convertKeysToCamelCase, convertKeysToSnakeCase } from './convert-keys';
 
 /**
  * Create axios instance with default configuration
@@ -70,21 +71,32 @@ export const apiClient = createApiClient();
 
 /**
  * Generic API call utility function
+ * Automatically converts:
+ * - Request data: camelCase -> snake_case (for backend)
+ * - Response data: snake_case -> camelCase (for frontend)
  */
 export async function apiCall<T>(
   config: AxiosRequestConfig
 ): Promise<{ data: T; message?: string }> {
   try {
+    // Convert request data from camelCase to snake_case if present
+    const requestConfig = { ...config };
+    if (requestConfig.data && typeof requestConfig.data === 'object') {
+      requestConfig.data = convertKeysToSnakeCase(requestConfig.data);
+    }
+
     const response = await apiClient.request<{
       success: boolean;
       data?: T;
       message?: string;
       error?: { message?: string };
-    }>(config);
+    }>(requestConfig);
 
     if (response.data.success && response.data.data) {
+      // Convert snake_case keys to camelCase
+      const convertedData = convertKeysToCamelCase(response.data.data);
       return {
-        data: response.data.data,
+        data: convertedData as T,
         message: response.data.message,
       };
     }

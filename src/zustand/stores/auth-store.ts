@@ -9,6 +9,7 @@ import {
   clearErrorAction,
   setLoadingAction,
   getCurrentUserProfileAction,
+  updateProfileAction,
 } from '@/zustand/actions/auth-actions';
 import { getAuthToken } from '@/lib/api-client';
 
@@ -66,7 +67,24 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           }
         },
         logout: () => logoutAction(set),
-        getCurrentUserProfile: async () => getCurrentUserProfileAction(set),
+        getCurrentUserProfile: async () => {
+          try {
+            await getCurrentUserProfileAction(set);
+          } catch (error) {
+            // Error is already handled by handleError in services
+            set({ isLoading: false });
+            throw error;
+          }
+        },
+        updateProfile: async (data) => {
+          try {
+            await updateProfileAction(data, set);
+          } catch (error) {
+            // Error is already handled by handleError in services
+            set({ isLoading: false });
+            throw error;
+          }
+        },
         clearError: () => clearErrorAction(set),
         setLoading: (loading: boolean) => setLoadingAction(loading, set),
       };

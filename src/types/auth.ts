@@ -29,41 +29,41 @@ export const registerSchema = z
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 
-// User type matching backend response
+// User type matching frontend camelCase format (converted from backend snake_case)
 export interface User {
-  _id: string;
+  id: string; // Converted from _id
   name: string;
   email: string;
   roles: ('landlord' | 'tenant' | 'admin')[];
   checkpoint: 'onboarding' | 'complete';
   image?: string;
-  landlord_profile?: {
-    verification_status: 'pending' | 'verified' | 'rejected';
-    upi_id?: string;
-    pan_number?: string;
-    bank_details?: {
-      account_number?: string;
-      ifsc_code?: string;
-      account_holder_name?: string;
+  landlordProfile?: {
+    verificationStatus: 'pending' | 'verified' | 'rejected';
+    upiId?: string;
+    panNumber?: string;
+    bankDetails?: {
+      accountNumber?: string;
+      ifscCode?: string;
+      accountHolderName?: string;
     };
   };
-  tenant_profile?: {
-    kyc_status: 'pending' | 'verified' | 'rejected';
-    current_employer?: string;
-    permanent_address?: string;
-    emergency_contact?: {
+  tenantProfile?: {
+    kycStatus: 'pending' | 'verified' | 'rejected';
+    currentEmployer?: string;
+    permanentAddress?: string;
+    emergencyContact?: {
       name?: string;
       phone?: string;
       relation?: string;
     };
   };
   subscription?: {
-    plan_type: 'free' | 'basic' | 'premium';
-    expires_at?: string;
-    payment_method?: string;
+    planType: 'free' | 'basic' | 'premium';
+    expiresAt?: string;
+    paymentMethod?: string;
   };
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Auth state type
@@ -75,6 +75,15 @@ export interface AuthState {
   error: string | null;
 }
 
+// Update profile payload type (camelCase for frontend)
+export interface UpdateProfilePayload {
+  name?: string;
+  image?: string;
+  checkpoint?: 'onboarding' | 'complete';
+  landlordProfile?: User['landlordProfile'];
+  tenantProfile?: User['tenantProfile'];
+}
+
 // Auth actions type
 export interface AuthActions {
   register: (name: string, email: string, password: string) => Promise<void>;
@@ -82,6 +91,7 @@ export interface AuthActions {
   loginWithGoogle: (onSuccess?: () => void) => Promise<void>;
   logout: () => void;
   getCurrentUserProfile: () => Promise<void>;
+  updateProfile: (data: UpdateProfilePayload) => Promise<void>;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
 }

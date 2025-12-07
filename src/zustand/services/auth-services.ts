@@ -1,7 +1,12 @@
 import { apiCall, getAuthToken } from '@/lib/api-client';
 import { api } from '@/configs/api';
 import { handleError } from '@/lib/handle-error';
-import type { LoginResponse, LoginFormValues, CurrentUserProfileResponse } from '@/types/auth';
+import type {
+  LoginResponse,
+  LoginFormValues,
+  CurrentUserProfileResponse,
+  UpdateProfilePayload,
+} from '@/types/auth';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 
@@ -108,6 +113,26 @@ export async function getCurrentUserProfile(): Promise<CurrentUserProfileRespons
     return response.data;
   } catch (error: unknown) {
     handleError(error, 'Failed to get current user profile.');
+    throw error;
+  }
+}
+
+/**
+ * Update user profile
+ * Updates the current user's profile information
+ */
+export async function updateUserProfile(
+  data: UpdateProfilePayload
+): Promise<CurrentUserProfileResponse> {
+  try {
+    const response = await apiCall<CurrentUserProfileResponse>({
+      method: 'PUT',
+      url: api.auth.profile(),
+      data,
+    });
+    return response.data;
+  } catch (error: unknown) {
+    handleError(error, 'Failed to update profile. Please try again.');
     throw error;
   }
 }
