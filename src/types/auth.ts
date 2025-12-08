@@ -39,22 +39,78 @@ export interface User {
   image?: string;
   landlordProfile?: {
     verificationStatus: 'pending' | 'verified' | 'rejected';
+    phone?: string;
+    alternatePhone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
     upiId?: string;
     panNumber?: string;
+    aadhaarNumber?: string;
+    gstNumber?: string;
+    companyName?: string;
+    companyRegistrationNumber?: string;
     bankDetails?: {
       accountNumber?: string;
       ifscCode?: string;
       accountHolderName?: string;
+      bankName?: string;
+      branchName?: string;
+    };
+    documents?: {
+      panDocument?: string;
+      aadhaarDocument?: string;
+      bankStatement?: string;
+      gstCertificate?: string;
     };
   };
   tenantProfile?: {
     kycStatus: 'pending' | 'verified' | 'rejected';
+    phone?: string;
+    alternatePhone?: string;
+    dateOfBirth?: string;
+    gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
     currentEmployer?: string;
+    jobTitle?: string;
+    employmentType?:
+      | 'full_time'
+      | 'part_time'
+      | 'contract'
+      | 'self_employed'
+      | 'unemployed'
+      | 'student';
+    monthlyIncome?: number;
     permanentAddress?: string;
+    currentAddress?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+    panNumber?: string;
+    aadhaarNumber?: string;
     emergencyContact?: {
       name?: string;
       phone?: string;
       relation?: string;
+      email?: string;
+    };
+    previousLandlordContact?: {
+      name?: string;
+      phone?: string;
+      email?: string;
+    };
+    employerContact?: {
+      name?: string;
+      phone?: string;
+      email?: string;
+      designation?: string;
+    };
+    documents?: {
+      panDocument?: string;
+      aadhaarDocument?: string;
+      employmentLetterDocument?: string;
+      salarySlip?: string;
+      previousRentAgreement?: string;
     };
   };
   subscription?: {
@@ -80,6 +136,7 @@ export interface UpdateProfilePayload {
   name?: string;
   image?: string;
   checkpoint?: 'onboarding' | 'complete';
+  roles?: ('landlord' | 'tenant' | 'admin')[];
   landlordProfile?: User['landlordProfile'];
   tenantProfile?: User['tenantProfile'];
 }

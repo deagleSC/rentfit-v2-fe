@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 import { convertKeysToCamelCase, convertKeysToSnakeCase } from './convert-keys';
+import { handle401Error } from './handle-401';
 
 /**
  * Create axios instance with default configuration
@@ -32,7 +33,7 @@ const createApiClient = (): AxiosInstance => {
   // Response interceptor for error handling
   client.interceptors.response.use(
     (response) => response,
-    (error: AxiosError) => {
+    async (error: AxiosError) => {
       // Handle common errors
       if (error.response) {
         // Server responded with error status
@@ -40,10 +41,11 @@ const createApiClient = (): AxiosInstance => {
         const data = error.response.data as { error?: { message?: string } };
 
         if (status === 401) {
-          // Unauthorized - clear token and redirect to login
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('auth_token');
-            // Optionally redirect to login page
+          // Unauthorized - clear all stores and logout
+          try {
+            await handle401Error();
+          } catch (err) {
+            console.error('Error in handle401Error:', err);
           }
         }
 

@@ -21,9 +21,13 @@ import { tenantProfileSchema, type TenantProfileFormValues } from '@/types/profi
 
 interface UpdateTenantProfileFormProps {
   onSubmit?: (data: TenantProfileFormValues) => void;
+  defaultValues?: Partial<TenantProfileFormValues>;
 }
 
-export default function UpdateTenantProfileForm({ onSubmit }: UpdateTenantProfileFormProps) {
+export default function UpdateTenantProfileForm({
+  onSubmit,
+  defaultValues: propDefaultValues,
+}: UpdateTenantProfileFormProps) {
   const {
     register,
     handleSubmit,
@@ -32,20 +36,20 @@ export default function UpdateTenantProfileForm({ onSubmit }: UpdateTenantProfil
   } = useForm<TenantProfileFormValues>({
     resolver: zodResolver(tenantProfileSchema),
     defaultValues: {
-      image: '',
-      phone: '',
-      gender: undefined,
-      currentEmployer: '',
-      jobTitle: '',
-      employmentType: undefined,
-      monthlyIncome: undefined,
-      permanentAddress: '',
-      city: '',
-      state: '',
-      pincode: '',
+      image: propDefaultValues?.image || '',
+      phone: propDefaultValues?.phone || '',
+      gender: propDefaultValues?.gender,
+      currentEmployer: propDefaultValues?.currentEmployer || '',
+      jobTitle: propDefaultValues?.jobTitle || '',
+      employmentType: propDefaultValues?.employmentType,
+      monthlyIncome: propDefaultValues?.monthlyIncome,
+      permanentAddress: propDefaultValues?.permanentAddress || '',
+      city: propDefaultValues?.city || '',
+      state: propDefaultValues?.state || '',
+      pincode: propDefaultValues?.pincode || '',
       documents: {
-        aadhaarDocument: '',
-        employmentLetterDocument: '',
+        aadhaarDocument: propDefaultValues?.documents?.aadhaarDocument || '',
+        employmentLetterDocument: propDefaultValues?.documents?.employmentLetterDocument || '',
       },
     },
   });

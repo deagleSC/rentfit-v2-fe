@@ -14,9 +14,13 @@ import { landlordProfileSchema, type LandlordProfileFormValues } from '@/types/p
 
 interface UpdateLandlordProfileFormProps {
   onSubmit?: (data: LandlordProfileFormValues) => void;
+  defaultValues?: Partial<LandlordProfileFormValues>;
 }
 
-export default function UpdateLandlordProfileForm({ onSubmit }: UpdateLandlordProfileFormProps) {
+export default function UpdateLandlordProfileForm({
+  onSubmit,
+  defaultValues: propDefaultValues,
+}: UpdateLandlordProfileFormProps) {
   const {
     register,
     handleSubmit,
@@ -25,22 +29,22 @@ export default function UpdateLandlordProfileForm({ onSubmit }: UpdateLandlordPr
   } = useForm<LandlordProfileFormValues>({
     resolver: zodResolver(landlordProfileSchema),
     defaultValues: {
-      image: '',
-      phone: '',
-      address: '',
-      city: '',
-      state: '',
-      pincode: '',
-      upiId: '',
+      image: propDefaultValues?.image || '',
+      phone: propDefaultValues?.phone || '',
+      address: propDefaultValues?.address || '',
+      city: propDefaultValues?.city || '',
+      state: propDefaultValues?.state || '',
+      pincode: propDefaultValues?.pincode || '',
+      upiId: propDefaultValues?.upiId || '',
       bankDetails: {
-        accountNumber: '',
-        ifscCode: '',
-        accountHolderName: '',
-        bankName: '',
-        branchName: '',
+        accountNumber: propDefaultValues?.bankDetails?.accountNumber || '',
+        ifscCode: propDefaultValues?.bankDetails?.ifscCode || '',
+        accountHolderName: propDefaultValues?.bankDetails?.accountHolderName || '',
+        bankName: propDefaultValues?.bankDetails?.bankName || '',
+        branchName: propDefaultValues?.bankDetails?.branchName || '',
       },
       documents: {
-        aadhaarDocument: '',
+        aadhaarDocument: propDefaultValues?.documents?.aadhaarDocument || '',
       },
     },
   });

@@ -31,7 +31,6 @@ export default function OnboardingPage() {
     addMessage,
     initializeMessages,
     completeOnboarding,
-    clearProfileData,
     reset,
   } = useOnboardingStore();
   const { updateProfile } = useAuthStore();
@@ -128,15 +127,21 @@ export default function OnboardingPage() {
 
   // Handle final CTA (Step 3)
   const handleGetStarted = async () => {
-    // If profile data exists, update the profile first
-    if (profileData) {
-      try {
-        // Transform profile data to match UpdateProfilePayload format (camelCase)
-        // Build payload object - backend accepts partial updates
-        const payloadData: Record<string, unknown> = {
-          checkpoint: 'complete',
-        };
+    console.log('handleGetStarted called', { profileData, selectedRole });
 
+    try {
+      // Build payload object - backend accepts partial updates
+      const payloadData: Record<string, unknown> = {
+        checkpoint: 'complete',
+      };
+
+      // Add selectedRole to roles array if a role is selected
+      if (selectedRole) {
+        payloadData.roles = [selectedRole];
+      }
+
+      // If profile data exists, include it in the payload
+      if (profileData) {
         if (selectedRole === 'landlord' && profileData.landlord) {
           const data = profileData.landlord;
           if (data.image) payloadData.image = data.image;
@@ -158,14 +163,18 @@ export default function OnboardingPage() {
               bankDetails.accountHolderName = data.bankDetails.accountHolderName;
             if (data.bankDetails.bankName) bankDetails.bankName = data.bankDetails.bankName;
             if (data.bankDetails.branchName) bankDetails.branchName = data.bankDetails.branchName;
-            if (Object.keys(bankDetails).length > 0) landlordProfile.bankDetails = bankDetails;
+            if (Object.keys(bankDetails).length > 0) {
+              landlordProfile.bankDetails = bankDetails;
+            }
           }
 
           if (data.documents) {
             const documents: Record<string, unknown> = {};
             if (data.documents.aadhaarDocument)
               documents.aadhaarDocument = data.documents.aadhaarDocument;
-            if (Object.keys(documents).length > 0) landlordProfile.documents = documents;
+            if (Object.keys(documents).length > 0) {
+              landlordProfile.documents = documents;
+            }
           }
 
           if (Object.keys(landlordProfile).length > 0) {
@@ -193,30 +202,37 @@ export default function OnboardingPage() {
               documents.aadhaarDocument = data.documents.aadhaarDocument;
             if (data.documents.employmentLetterDocument)
               documents.employmentLetterDocument = data.documents.employmentLetterDocument;
-            if (Object.keys(documents).length > 0) tenantProfile.documents = documents;
+            if (Object.keys(documents).length > 0) {
+              tenantProfile.documents = documents;
+            }
           }
 
           if (Object.keys(tenantProfile).length > 0) {
             payloadData.tenantProfile = tenantProfile;
           }
         }
-
-        // Update profile - cast to UpdateProfilePayload since backend accepts partial updates
-        await updateProfile(payloadData as UpdateProfilePayload);
-
-        // Clear profile data from store
-        clearProfileData();
-      } catch (error) {
-        console.error('Failed to update profile:', error);
-        // Still complete onboarding even if profile update fails
       }
+
+      console.log('Updating profile with payload:', payloadData);
+      // Update profile - cast to UpdateProfilePayload since backend accepts partial updates
+      await updateProfile(payloadData as UpdateProfilePayload);
+      console.log('Profile updated successfully');
+
+      // Clear onboarding data
+      reset();
+
+      // Complete onboarding
+      completeOnboarding();
+
+      // Navigate to home or dashboard
+      router.push('/');
+    } catch (error) {
+      console.error('Failed to complete onboarding:', error);
+      // Still complete onboarding and navigate even if update fails
+      reset();
+      completeOnboarding();
+      router.push('/');
     }
-
-    // Complete onboarding
-    completeOnboarding();
-
-    // Navigate to home or dashboard
-    router.push('/');
   };
 
   // Normalize timestamps (convert string to Date if needed)

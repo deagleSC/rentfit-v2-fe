@@ -56,10 +56,16 @@ export async function loginAction(email: string, password: string, set: SetState
 /**
  * Logout action
  * Handles logout logic and state updates
+ * Clears all localStorage data
  */
 export function logoutAction(set: SetState): void {
   // Clear token from localStorage
   setAuthToken(null);
+
+  // Clear all localStorage data
+  if (typeof window !== 'undefined') {
+    localStorage.clear();
+  }
 
   // Reset state
   set({
